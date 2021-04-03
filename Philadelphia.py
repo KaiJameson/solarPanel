@@ -81,11 +81,10 @@ def povDrawMirror(dayTime, mirrorP):
     centerP = tuple(map(operator.add, mirrorP, (0 , 0, PoleHeight)))
     centerBelowP = tuple(map(operator.add, mirrorP, (0 , 0, PoleHeight-0.1)))
 
-    bisectV = tuple(map(operator.add, sunV, mirrorP))
     # make the mirror
     half = (MirrorWidth/2, MirrorHeight/2,0)
-    cornerLL = tuple(map(operator.sub, bisectV, half))
-    cornerUR = tuple(map(operator.add, bisectV, half))
+    cornerLL = tuple(map(operator.sub, sunV, half))
+    cornerUR = tuple(map(operator.add, sunV, half))
     
     # DEBUG
     # povDrawVector(dayTime, multiVector(sunV, 20), center, color = 'Red')
@@ -93,9 +92,11 @@ def povDrawMirror(dayTime, mirrorP):
     # povDrawVector(dayTime, multiVector(bisectV, 20), center, color = 'Blue')
     # rotations of mirror to face the bisect vector
     #https://groups.google.com/forum/#!topic/comp.graphics.algorithms/vuHUqZnYxtA
-    (x, y, z) = unitVector(bisectV)
-    azimuth = -1*math.degrees(math.atan2(x,y)) # rotate around the z axis
-    elevation = -1*math.degrees(math.acos( z)) # rotate around the x axis
+    (elevation, azimuth) = sunPosition(dayTime)
+    elevation *= -1
+    elevation = math.degrees(elevation)
+    azimuth *= -1
+    azimuth = math.degrees(azimuth)
     # top mirror surface
     with open(filePath(dayTime), 'a') as fp:
         fp.write("//mirror\nbox{ <%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>\n" % (cornerLL + cornerUR))
@@ -154,14 +155,6 @@ def povDrawGround(dayTime):
         fp.write("//ground\nbox{ <%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>\n" % (cornerLL + cornerUR))
         fp.write("    texture{pigment{color YellowGreen}}}\n")
     
-def povDrawTower(dayTime):
-    with open(filePath(dayTime), 'a') as fp:
-        # draw a white sphere at tower top
-       # fp.write("// tower\nsphere{<%.3f, %.3f, %.3f>, %.3f\n"  % (0, 0, TowerHeight, TowerRadius))
-       # fp.write("   texture{pigment{color White} \n   finish{ambient 0.15 diffuse 2.0}}}\n")
-       fp.write("cylinder{<%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>, %.3f\n"  % (0, 0, TowerHeight/2, 0, 0, 0, 1))
-       fp.write("   texture{pigment{color White} \n   finish{ambient 0.15 diffuse 2.0}}}\n")
-       
 def povSetup(dayTime):
     # delete old and create new
     sunPoint = tuple([i * 100 for i in sunVector(dayTime)])
@@ -182,8 +175,8 @@ def sunPosition(dayTime):
     
 def sunVector(dayTime):
     # https://math.stackexchange.com/questions/1150232/finding-the-unit-direction-vector-given-azimuth-and-elevation
-    (el, az) = sunPosition(dayTime)
-    return (math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), math.sin(el))
+    (elevation, azimuth) = sunPosition(dayTime)
+    return (math.sin(azimuth) * math.cos(elevation), math.cos(azimuth) * math.cos(elevation), math.sin(elevation))
     
 def generateSolarCollector(dayTime):
     # generate a pov ray file named for this date and time
