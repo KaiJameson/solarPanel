@@ -80,7 +80,7 @@ def povDrawMirror(dayTime, mirrorP):
     # location of the mirror center
     centerP = tuple(map(operator.add, mirrorP, (0 , 0, PoleHeight)))
     centerBelowP = tuple(map(operator.add, mirrorP, (0 , 0, PoleHeight-0.1)))
-
+    # bisectV = tuple(map(operator.add, sunV, centerP))
     # make the mirror
     half = (MirrorWidth/2, MirrorHeight/2,0)
     cornerLL = tuple(map(operator.sub, sunV, half))
@@ -92,11 +92,9 @@ def povDrawMirror(dayTime, mirrorP):
     # povDrawVector(dayTime, multiVector(bisectV, 20), center, color = 'Blue')
     # rotations of mirror to face the bisect vector
     #https://groups.google.com/forum/#!topic/comp.graphics.algorithms/vuHUqZnYxtA
-    (elevation, azimuth) = sunPosition(dayTime)
-    elevation *= -1
-    elevation = math.degrees(elevation)
-    azimuth *= -1
-    azimuth = math.degrees(azimuth)
+    (x, y, z) = unitVector(sunV)
+    azimuth = -1*math.degrees(math.atan2(x,y)) # rotate around the z axis
+    elevation = -1*math.degrees(math.acos( z)) # rotate around the x axis
     # top mirror surface
     with open(filePath(dayTime), 'a') as fp:
         fp.write("//mirror\nbox{ <%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>\n" % (cornerLL + cornerUR))
