@@ -93,8 +93,8 @@ def povDrawMirror(dayTime, mirrorP):
     # rotations of mirror to face the bisect vector
     #https://groups.google.com/forum/#!topic/comp.graphics.algorithms/vuHUqZnYxtA
     (x, y, z) = unitVector(bisectV)
-    azimuth = math.degrees(math.atan2(x,y)) # rotate around the z axis
-    elevation = math.degrees(math.acos(z)) # rotate around the x axis
+    azimuth = -1*math.degrees(math.atan2(x,y)) # rotate around the z axis
+    elevation = -1*math.degrees(math.acos(z)) # rotate around the x axis
     # top mirror surface
     with open(filePath(dayTime), 'a') as fp:
         fp.write("//mirror\nbox{ <%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>\n" % (cornerLL + cornerUR))
@@ -155,7 +155,7 @@ def povDrawGround(dayTime):
     
 def povSetup(dayTime):
     # delete old and create new
-    sunPoint = tuple([i * 100 for i in sunVector(dayTime)])
+    sunPoint = tuple([i * 300 for i in sunVector(dayTime)])
     if os.path.exists(filePath(dayTime)):
         os.remove(filePath(dayTime)) 
     with open(filePath(dayTime), 'w') as fp:
