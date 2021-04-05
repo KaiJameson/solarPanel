@@ -66,7 +66,8 @@ SunPov = "//sun\nlight_source{ <0,0,0> color rgb<1,1,1>\n   looks_like{ sphere{<
 #CameraPov = "//camera\ncamera {orthographic angle 60\n   location <0.000, 400.000, 00.000>\n    look_at <0.000, 0.000, 000.000>\n  rotate<90, 0, 0> }\n"
 # for debugging at the tower top
 # CameraPov = "//camera\ncamera {fisheye angle 120\n   location <%.3f, %.3f, %.3f>\n    look_at <0.000, 0.000, 000.000>\n  rotate<90, 0, 0> }\n"
-CameraPov = "//camera\ncamera {fisheye angle 120\n   location <%.3f, %.3f, %.3f>\n    look_at <0.000, 0.000, 000.000>\n  rotate<0, 0, 0> }\n"
+# CameraPov = "//camera\ncamera {fisheye angle 120\n   location <%.3f, %.3f, %.3f>\n    look_at <0.000, 0.000, 000.000>\n  rotate<0, 0, 0> }\n"
+CameraPov = "//camera\ncamera {orthographic right 150 up 150\n   location <%.3f, %.3f, %.3f>\n    look_at <0.000, 0.000, 000.000>\n  rotate<0, 0, 0> }\n"
 #Draws the primary lightsource (sun) at <x,y,z>...     
 def povDrawSun(dayTime):
     # draws the sun
