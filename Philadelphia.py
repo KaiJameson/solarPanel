@@ -83,8 +83,8 @@ def povDrawMirror(dayTime, mirrorP):
     bisectV = tuple(map(operator.add, sunV, centerP))
     # make the mirror
     half = (MirrorWidth/2, MirrorHeight/2,0)
-    cornerLL = tuple(map(operator.sub, bisectV, half))
-    cornerUR = tuple(map(operator.add, bisectV, half))
+    cornerLL = tuple(map(operator.sub, sunV, half))
+    cornerUR = tuple(map(operator.add, sunV, half))
     
     # DEBUG
     # povDrawVector(dayTime, multiVector(sunV, 20), center, color = 'Red')
@@ -92,7 +92,7 @@ def povDrawMirror(dayTime, mirrorP):
     # povDrawVector(dayTime, multiVector(bisectV, 20), center, color = 'Blue')
     # rotations of mirror to face the bisect vector
     #https://groups.google.com/forum/#!topic/comp.graphics.algorithms/vuHUqZnYxtA
-    (x, y, z) = unitVector(bisectV)
+    (x, y, z) = unitVector(sunV)
     azimuth = -1*math.degrees(math.atan2(x,y)) # rotate around the z axis
     elevation = -1*math.degrees(math.acos(z)) # rotate around the x axis
     # top mirror surface
@@ -155,7 +155,7 @@ def povDrawGround(dayTime):
     
 def povSetup(dayTime):
     # delete old and create new
-    sunPoint = tuple([i * 300 for i in sunVector(dayTime)])
+    sunPoint = tuple([i * 200 for i in sunVector(dayTime)])
     if os.path.exists(filePath(dayTime)):
         os.remove(filePath(dayTime)) 
     with open(filePath(dayTime), 'w') as fp:
