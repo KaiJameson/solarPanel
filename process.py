@@ -20,17 +20,21 @@ my_env = os.environ.copy()
 
 povFiles = glob.glob("*.pov")
 print(len(povFiles))
-for povFile in povFiles:
-  # print(povFile)
-  subprocess.run(["pvengine" , "-d",povFile])
-  # subprocess.Popen(f"start pvengine {povFile} -d /exit", shell=False)
-done = False 
 pngFiles = []
+threshhold = 10
+idx = 0
+while idx < len(povFiles):
+  if idx < len(pngFiles) + threshhold:
+    subprocess.Popen(f"start pvengine {povFiles[idx]} -d Grayscale_Output=true /exit", shell=True)
+    idx += 1
+  else:
+    pngFiles = glob.glob("*.png")
+    time.sleep(.25)
+done = False 
 while not done:
   pngFiles = glob.glob("*.png")
   if len(pngFiles) == len(povFiles):
     done = True
-  time.sleep(1)
 print("done with png processing")
 sunPixels = 0
 for pngFile in pngFiles:
@@ -39,12 +43,15 @@ for pngFile in pngFiles:
   totalPixels = len(data)*len(data[0])
   for i in range(len(data)):
     for j in range(len(data[0])):
-      white = True
-      for k in range(3):
-        if data[i][j][k] < 255:
-          white = False 
-      if white:
+      # white = True
+      if data[i][j] == 65535:
         sunPixels += 1
+      # for k in range(3):
+      #   if data[i][j][k] < 255:
+      #     white = False 
+      #     break
+      # if white:
+        # sunPixels += 1
 
 print("sunscore is " + str(sunPixels))
 
