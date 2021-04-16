@@ -9,7 +9,7 @@ class SolarLayout:
       self.generateLayout()
     else:
       self.convertFromString(layout)
-    self.setPoitns()
+    self.setPoints()
 
   def generateLayout(self):
     lst = []
@@ -22,11 +22,7 @@ class SolarLayout:
     return (angle,distance)
 
   def __str__(self):
-    layout = ""
-    for i in range(len(self.layout)-1):
-      layout += "%.4f|%d," % self.layout[i]
-    layout += "%.4f|%d" % self.layout[len(self.layout)-1]
-    return layout
+    return self.makeString(self.layout)
 
   def convertFromString(self, layoutString):
     panels = layoutString.strip().split(",")
@@ -61,6 +57,13 @@ class SolarLayout:
       return True
     return False
 
+  def makeString(self, layout):
+    layoutString = ""
+    for i in range(len(layout)-1):
+      layoutString += "%.4f|%d," % layout[i]
+    layoutString += "%.4f|%d" % layout[len(layout)-1]
+    return layoutString
+
   def __add__(self,other):
     start = random.randint(0,self.panelCount)
     end = random.randint(0,self.panelCount)
@@ -74,5 +77,17 @@ class SolarLayout:
     secondParentLayout = other.getLayout()
     for i in range(start,end+1):
       childLayout[i] = secondParentLayout[i]
+    return SolarLayout(self.makeString(childLayout))
+    
+  def mutate(self):
+    mutateCt = self.panelCount / 5
+    mutated = []
+    for i in range(mutateCt):
+      mutateIdx = random.randint(0,self.panelCount)
+      while mutateIdx in mutated:
+        mutateIdx = random.randint(0,self.panelCount)
+      self.layout[mutateIdx] = self.generatePanel()
+      mutated.append(mutateIdx)
+    self.setPoints()
     
 
