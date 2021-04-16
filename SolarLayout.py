@@ -3,16 +3,17 @@ import math
 class SolarLayout:
   def __init__(self, layout=None):
     self.maxDistance = 120
-    self.panels = 80
+    self.panelCount = 80
     self.score = 0
     if layout is None:
       self.generateLayout()
     else:
       self.convertFromString(layout)
+    self.setPoitns()
 
   def generateLayout(self):
     lst = []
-    for i in range(self.panels):
+    for i in range(self.panelCount):
       lst.append(self.generatePanel())
     self.layout = lst
   def generatePanel(self):
@@ -35,11 +36,20 @@ class SolarLayout:
       lst.append(float(parts[0]), int(parts[1]))
     self.layout = lst
 
+  def setPoints(self):
+    self.points = [(d*math.cos(angle), d*math.sin(angle), 0) for (angle, d) in self.layout]
+
+  def getPoints(self):
+    return self.points
+
   def setScore(self, score):
     self.score = score
   
   def getScore(self):
     return self.score
+
+  def getLayout(self):
+    return self.layout
 
   def __gt__(self, other):
     if self.getScore() > other.getScore():
@@ -50,4 +60,19 @@ class SolarLayout:
     if self.getScore() < other.getScore():
       return True
     return False
+
+  def __add__(self,other):
+    start = random.randint(0,self.panelCount)
+    end = random.randint(0,self.panelCount)
+    while start == end:
+      end = random.randint(0,self.panelCount)
+    if start > end:
+      temp = start 
+      start = end
+      end = temp
+    childLayout = self.layout[:]
+    secondParentLayout = other.getLayout()
+    for i in range(start,end+1):
+      childLayout[i] = secondParentLayout[i]
+    
 
