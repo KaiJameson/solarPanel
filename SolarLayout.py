@@ -29,7 +29,7 @@ class SolarLayout:
     lst = []
     for panel in panels:
       parts = panel.split("|")
-      lst.append(float(parts[0]), int(parts[1]))
+      lst.append((float(parts[0]), int(parts[1])))
     self.layout = lst
 
   def setPoints(self):
@@ -80,12 +80,12 @@ class SolarLayout:
     return SolarLayout(self.makeString(childLayout))
     
   def mutate(self):
-    mutateCt = self.panelCount / 5
+    mutateCt = self.panelCount // 5
     mutated = []
     for i in range(mutateCt):
-      mutateIdx = random.randint(0,self.panelCount)
+      mutateIdx = random.randint(0,self.panelCount-1)
       while mutateIdx in mutated:
-        mutateIdx = random.randint(0,self.panelCount)
+        mutateIdx = random.randint(0,self.panelCount-1)
       self.layout[mutateIdx] = self.generatePanel()
       mutated.append(mutateIdx)
     self.setPoints()

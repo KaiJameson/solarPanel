@@ -62,6 +62,31 @@ SunPov = "//sun\nlight_source{ <0,0,0> color rgb<1,1,1>\n   looks_like{ sphere{<
 CameraPov = "//camera\ncamera {orthographic right 150 up 150\n   location <%.3f, %.3f, %.3f>\n    look_at <0.000, 0.000, 000.000>\n  rotate<0, 0, 0> }\n"
 #Draws the primary lightsource (sun) at <x,y,z>...     
 
+
+def deleteFiles(dirObject , dirPath):
+    if dirObject.is_dir(follow_symlinks=False):
+        name = os.fsdecode(dirObject.name)
+        newDir = dirPath+"/"+name
+        moreFiles = os.scandir(newDir)
+        for file in moreFiles:
+            if file.is_dir(follow_symlinks=False):
+                deleteFiles(file, newDir)
+                os.rmdir(newDir+"/"+os.fsdecode(file.name))
+            else:
+                os.remove(newDir+"/"+os.fsdecode(file.name))
+        os.rmdir(newDir)
+    else:
+        os.remove(dirPath+"/"+os.fsdecode(dirObject.name))
+
+def clearPath(dataPath):
+    if os.path.exists(dataPath):
+        for file in os.scandir(dataPath):
+            deleteFiles(file, dataPath)
+    else:
+        os.makedirs(dataPath)
+
+
+
 class CityVisualizer:
     def __init__(self, cityName):
         if not cityName in usaLocList:
@@ -69,8 +94,8 @@ class CityVisualizer:
         self.city = usaLocList[cityName]
         self.timeZone = timezone(self.city.timezone)
         self.dataPath = "./reflector/" + cityName + "/"
-        if not os.path.exists(self.dataPath):
-            os.makedirs(self.dataPath)
+        clearPath(self.dataPath)
+
     def povDrawSun(self,dayTime):
         # draws the sun
         sunPoint = tuple([i * DistanceToSun for i in self.sunVector(dayTime)])
@@ -224,7 +249,7 @@ class CityVisualizer:
         povFiles = glob.glob("*.pov")
         print(len(povFiles))
         pngFiles = []
-        threshhold = 10
+        threshhold = 5
         idx = 0
         while idx < len(povFiles):
             if idx < len(pngFiles) + threshhold:
@@ -257,7 +282,7 @@ class CityVisualizer:
                         # sunPixels += 1
 
         print("sunscore is " + str(sunPixels))
-
+        os.chdir(os.path.abspath("../.."))
         end = datetime.now()
         duration = end-start 
         print(duration)
