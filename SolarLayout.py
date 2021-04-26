@@ -65,10 +65,10 @@ class SolarLayout:
     return layoutString
 
   def __add__(self,other):
-    start = random.randint(0,self.panelCount)
-    end = random.randint(0,self.panelCount)
+    start = random.randint(0,self.panelCount-1)
+    end = random.randint(0,self.panelCount-1)
     while start == end:
-      end = random.randint(0,self.panelCount)
+      end = random.randint(0,self.panelCount-1)
     if start > end:
       temp = start 
       start = end
