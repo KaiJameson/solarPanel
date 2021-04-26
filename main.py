@@ -21,6 +21,7 @@ def checkExistingGeneration():
   return os.path.exists(generationStorage)
 
 def loadGeneration():
+  global generationSize
   layouts = []
   if checkExistingGeneration():
     f = open(generationStorage, "r")
@@ -28,7 +29,7 @@ def loadGeneration():
       layouts.append(SolarLayout.SolarLayout(line.strip()))
     f.close()
   else:
-    for i in range(2):
+    for i in range(generationSize):
       layouts.append(SolarLayout.SolarLayout())
   return layouts
 
@@ -38,28 +39,34 @@ def generationNum():
     f = open(bestOfStorage, "r")
     lines = f.readlines()
     f.close()
-    return len(lines)
+    return len(lines)+1
   else:
     return 0
-generationSize = 2
+generationSize = 10
 currentGeneration = loadGeneration()
 generationCt = generationNum()
+
+scores = {}
+
 while True:
   print(f"Starting generation {generationCt}")
   #create 2 children
-  for i in range(generationSize):
-    currentGeneration.append(currentGeneration[0]+currentGeneration[1])
+  for i in range(generationSize-1):
+    currentGeneration.append(currentGeneration[i]+currentGeneration[i+1])
   #randomly mutate up to half the population of this generation
   for i in range(random.randint(0,len(currentGeneration)//2)):
     toMutate = random.randint(0,len(currentGeneration)-1)
     currentGeneration[toMutate].mutate()
   for layout in currentGeneration:
-    visualizer = CityVisualizer.CityVisualizer(city)
-    visualizer.oneDaySimulation(layout.getPoints(), sampleTime=30)
-    layout.setScore(visualizer.process())
+    if str(layout) in scores.keys():
+      layout.setScore(scores[str(layout)])
+    else:
+      visualizer = CityVisualizer.CityVisualizer(city)
+      visualizer.oneDaySimulation(layout.getPoints(), sampleTime=30)
+      layout.setScore(visualizer.process())
+      scores[str(layout)] = layout.getScore()
   print("sorting")
   currentGeneration.sort()
-  
   nextGeneration = []
   for i in range(generationSize):
     nextGeneration.append(currentGeneration[len(currentGeneration)-1-i])
@@ -76,7 +83,7 @@ while True:
   f.close()
   print("Saving best of")
   bestOf = open(bestOfStorage, "a")
-  bestOf.write(str(nextGeneration[0])+","+str(nextGeneration[0].getScore())+"\n")
+  bestOf.write(str(nextGeneration[0])+"_"+str(nextGeneration[0].getScore())+"\n")
   bestOf.close()
   print("Done saving info")
   currentGeneration = nextGeneration
