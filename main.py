@@ -62,7 +62,7 @@ while True:
       layout.setScore(scores[str(layout)])
     else:
       visualizer = CityVisualizer.CityVisualizer(city)
-      visualizer.oneDaySimulation(layout.getPoints(), sampleTime=30)
+      visualizer.generalSimulation(layout.getPoints, 30)
       layout.setScore(visualizer.process())
       scores[str(layout)] = layout.getScore()
   print("sorting")

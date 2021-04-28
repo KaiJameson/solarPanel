@@ -190,7 +190,13 @@ class CityVisualizer:
             dayTime = dayTime + relativedelta(minutes=+sampleTime)
             if (dayTime >= sunRise and dayTime <= sunSet):
                 self.visualizeLayout(dayTime, points)
-                
+
+    def generalSimulation(self, points, sampleTime):
+        daytimes = [datetime(2020,6,21,0,0,0, 0, self.timeZone), datetime(2020,12,21,0,0,0,0, self.timeZone), datetime(2020,9,21,0,0,0,0,self.timeZone)]
+        for daytime in daytimes:
+            oneDaySimulation(points, dayTime=daytime, sampleTime=sampleTime)
+
+
     def oneYearSimulation(self,points,year = 2019, sampleTime = 60, sampleDays = 30):
         # generate pov sequence for each of these days
         zeroDay = datetime(year, 1, 1, 0, 0, 0, 0, self.timeZone)
