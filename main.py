@@ -53,6 +53,7 @@ while True:
   #create 2 children
   for i in range(generationSize-1):
     currentGeneration.append(currentGeneration[i]+currentGeneration[i+1])
+  currentGeneration.append(currentGeneration[0]+currentGeneration[len(currentGeneration)-1])
   #randomly mutate up to half the population of this generation
   for i in range(random.randint(0,len(currentGeneration)//2)):
     toMutate = random.randint(0,len(currentGeneration)-1)
@@ -62,7 +63,7 @@ while True:
       layout.setScore(scores[str(layout)])
     else:
       visualizer = CityVisualizer.CityVisualizer(city)
-      visualizer.generalSimulation(layout.getPoints, 30)
+      visualizer.generalSimulation(layout.getPoints(), 30)
       layout.setScore(visualizer.process())
       scores[str(layout)] = layout.getScore()
   print("sorting")

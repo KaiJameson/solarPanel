@@ -41,13 +41,16 @@ class SolarLayout:
     movement = [distance*math.cos(angle), distance*math.sin(angle)] 
     point = [startingPoint[0]+movement[0], startingPoint[1]+movement[1]]
     while self.dist(point) > self.maxDistance:
+      if (len(angles) == 0):
+        print("distance of " + str(self.dist(point)))
+        return self.generatePanel()
       angle = angles.pop()
       movement = [distance*math.cos(angle), distance*math.sin(angle)] 
       point = [startingPoint[0]+movement[0], startingPoint[1]+movement[1]]
     return self.getTuple(point)
 
   def dist(self, point):
-    return (point[0]**2)+(point[1]**2)**.5
+    return ((point[0]**2)+(point[1]**2))**.5
   
   def getTuple(self, point):
     angle = math.atan(point[1]/point[0])

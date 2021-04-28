@@ -193,8 +193,8 @@ class CityVisualizer:
 
     def generalSimulation(self, points, sampleTime):
         daytimes = [datetime(2020,6,21,0,0,0, 0, self.timeZone), datetime(2020,12,21,0,0,0,0, self.timeZone), datetime(2020,9,21,0,0,0,0,self.timeZone)]
-        for daytime in daytimes:
-            oneDaySimulation(points, dayTime=daytime, sampleTime=sampleTime)
+        for dayTime in daytimes:
+            self.oneDaySimulation(points, dayTime=dayTime, sampleTime=sampleTime)
 
 
     def oneYearSimulation(self,points,year = 2019, sampleTime = 60, sampleDays = 30):
