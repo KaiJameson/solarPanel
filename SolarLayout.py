@@ -32,6 +32,29 @@ class SolarLayout:
       lst.append((float(parts[0]), int(parts[1])))
     self.layout = lst
 
+  def mutatePanel(self, panel):
+    startingPoint = [panel[1]*math.cos(panel[0]),panel[1]*math.sin(panel[0])]
+    angles = [math.radians(i* 30) for i in range(12)]
+    distance = random.randint(2,4)
+    random.shuffle(angles)
+    angle = angles.pop()
+    movement = [distance*math.cos(angle), distance*math.sin(angle)] 
+    point = [startingPoint[0]+movement[0], startingPoint[1]+movement[1]]
+    while self.dist(point) > self.maxDistance:
+      angle = angles.pop()
+      movement = [distance*math.cos(angle), distance*math.sin(angle)] 
+      point = [startingPoint[0]+movement[0], startingPoint[1]+movement[1]]
+    return self.getTuple(point)
+
+  def dist(self, point):
+    return (point[0]**2)+(point[1]**2)**.5
+  
+  def getTuple(self, point):
+    angle = math.atan(point[1]/point[0])
+    if point[0] < 0:
+      angle += math.pi
+    return (angle, self.dist(point))
+
   def setPoints(self):
     self.points = [(d*math.cos(angle), d*math.sin(angle), 0) for (angle, d) in self.layout]
 
@@ -86,7 +109,7 @@ class SolarLayout:
       mutateIdx = random.randint(0,self.panelCount-1)
       while mutateIdx in mutated:
         mutateIdx = random.randint(0,self.panelCount-1)
-      self.layout[mutateIdx] = self.generatePanel()
+      self.layout[mutateIdx] = self.mutatePanel(self.layout[mutateIdx])
       mutated.append(mutateIdx)
     self.setPoints()
     
