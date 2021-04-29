@@ -2,7 +2,7 @@ import CityVisualizer
 import SolarLayout 
 import os
 import random
-
+import json
 
 
 #check to see if a current  generation already exists
@@ -17,6 +17,7 @@ city = "Omaha"
 
 generationStorage = "currentGeneration.txt"
 bestOfStorage = "bestOf.csv"
+jsonScores = "scores.json"
 def checkExistingGeneration():
   return os.path.exists(generationStorage)
 
@@ -46,7 +47,22 @@ generationSize = 10
 currentGeneration = loadGeneration()
 generationCt = generationNum()
 
-scores = {}
+def load_scores():
+  if os.path.exists(jsonScores):
+    f = open(jsonScores)
+    scores = json.load(f)
+    f.close()
+    return scores
+  else:
+    return {}
+
+scores = load_scores()
+
+def save_scores(scores):
+  f = open(jsonScores, "w")
+  json.dump(scores,f,ensure_ascii=False,indent=2)
+  f.close()
+
 
 while True:
   print(f"Starting generation {generationCt}")
@@ -63,7 +79,7 @@ while True:
       layout.setScore(scores[str(layout)])
     else:
       visualizer = CityVisualizer.CityVisualizer(city)
-      visualizer.generalSimulation(layout.getPoints(), 30)
+      visualizer.generalSimulation(layout.getPoints(), 60)
       layout.setScore(visualizer.process())
       scores[str(layout)] = layout.getScore()
   print("sorting")
@@ -86,6 +102,8 @@ while True:
   bestOf = open(bestOfStorage, "a")
   bestOf.write(str(nextGeneration[0])+"_"+str(nextGeneration[0].getScore())+"\n")
   bestOf.close()
+  print("saving scores")
+  save_scores(scores)
   print("Done saving info")
   currentGeneration = nextGeneration
   generationCt += 1
