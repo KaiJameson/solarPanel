@@ -2,7 +2,7 @@ import CityVisualizer
 import SolarLayout 
 import os
 
-generation = 27
+generation = 103
 
 
 
@@ -22,7 +22,7 @@ f.close()
 
 visualizer = CityVisualizer.CityVisualizer(city)
 layout = SolarLayout.SolarLayout(layouts[generation])
-visualizer.oneDaySimulation(layout.getPoints(), sampleTime=5)
+visualizer.generalSimulation(layout.getPoints(), 5)
 visualizer.process()
 
 
