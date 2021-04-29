@@ -230,7 +230,7 @@ class CityVisualizer:
         povFiles = glob.glob("*.pov")
         print(len(povFiles))
         pngFiles = []
-        threshhold = 5
+        threshhold = 3
         idx = 0
         while idx < len(povFiles):
             if idx < len(pngFiles) + threshhold:
