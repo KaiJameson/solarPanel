@@ -18,9 +18,8 @@ import glob
 import time 
 from PIL import Image
 
+#getting the list of all US cities in the astral database
 db = geocoder.database()
-# for key in db.keys():
-  # print()
 locations = geocoder.all_locations(db)
 locList = []
 usaLocList = {}
@@ -34,15 +33,13 @@ for location in locations:
 utc = pytz.UTC
 
 #####################################
-# setup GLOBALs design: tower hight in meters, mirror dimensions and list of reflectors
+# setup GLOBALs design: tower hight in meters, tracker dimensions 
 DistanceToSun = 10200 # far away so all rays are parallel
 PanelWidth = 10
 PanelHeight = 10
 PanelRadius = 6
 PoleHeight = 10 #hight above ground of the panels
-Size = 400 #size of the domain with tower in center
-# make a simple spiral for testing
-# front of mirror
+Size = 400 #size of the domain
 PanelPov = "    texture {pigment {color rgb <1,1,1>} finish {diffuse 0 ambient 0.01 reflection 1.0 phong 1 phong_size 100}}\n"
 # back of mirror which could be customized
 BlackPov = "    texture {pigment {color rgb <0,0,0>} finish {diffuse 0 ambient 0.00 reflection 0.0 phong 0 phong_size 0}}\n"
@@ -50,7 +47,7 @@ BlackPov = "    texture {pigment {color rgb <0,0,0>} finish {diffuse 0 ambient 0
 SunPov = "//sun\nlight_source{ <0,0,0> color rgb<1,1,1>\n   looks_like{ sphere{<0.000, 0.000, 0.000>, 3.000\n       texture{pigment{color Yellow} finish{ambient 0.75 diffuse 2.0}}}}\n translate <%.3f, %.3f, %.3f>}\n"
 CameraPov = "//camera\ncamera {orthographic right 150 up 150\n   location <%.3f, %.3f, %.3f>\n    look_at <0.000, 0.000, 000.000>\n  rotate<0, 0, 0> }\n"
 
-
+#clear away all previous pov and png files for this city
 def deleteFiles(dirObject , dirPath):
     if dirObject.is_dir(follow_symlinks=False):
         name = os.fsdecode(dirObject.name)
@@ -91,42 +88,25 @@ class CityVisualizer:
             fp.write(SunPov % sunPoint)   
 
     def povDrawPanel(self,dayTime, point):
-        # bisect vector
         sunV = self.sunVector(dayTime)
-        # location of the mirror center
+        # location of the tracker center
         centerP = tuple(map(operator.add, point, (0 , 0, PoleHeight)))
         centerBelowP = tuple(map(operator.add, point, (0 , 0, PoleHeight-0.1)))
         bisectV = tuple(map(operator.add, sunV, centerP))
-        # make the mirror
         half = (PanelWidth/2, PanelHeight/2,0)
         cornerLL = tuple(map(operator.sub, sunV, half))
         cornerUR = tuple(map(operator.add, sunV, half))
         
-        # rotations of mirror to face the bisect vector
-        #https://groups.google.com/forum/#!topic/comp.graphics.algorithms/vuHUqZnYxtA
         (x, y, z) = self.unitVector(sunV)
-        azimuth = -1*math.degrees(math.atan2(x,y)) # rotate around the z axis
-        elevation = -1*math.degrees(math.acos(z)) # rotate around the x axis
-        # top mirror surface
+        azimuth = -1*math.degrees(math.atan2(x,y))
+        elevation = -1*math.degrees(math.acos(z))
+        #draw the surface of the tracker
         with open(self.filePath(dayTime), 'a') as fp:
             fp.write("//mirror\nbox{ <%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>\n" % (cornerLL + cornerUR))
             fp.write(PanelPov)
             fp.write("    rotate <%.3f, %.3f, %.3f>\n" % (elevation,0,0))
             fp.write("    rotate <%.3f, %.3f, %.3f>\n" % (0,0,azimuth))
             fp.write("    translate <%.3f, %.3f, %.3f>}\n" % centerP)
-        #back of mirror surface (black)
-        # with open(filePath(dayTime), 'a') as fp:
-        #     fp.write("//mirror\nbox{ <%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>\n" % (cornerLL + cornerUR))
-        #     fp.write(BlackPov)
-        #     fp.write("    rotate <%.3f, %.3f, %.3f>\n" % (elevation,0,0))
-        #     fp.write("    rotate <%.3f, %.3f, %.3f>\n" % (0,0,azimuth))
-        #     fp.write("    translate <%.3f, %.3f, %.3f>}\n" % centerBelowP)   
-        # # draw pole supporting mirror 
-        # with open(filePath(dayTime), 'a') as fp:
-        #    # fp.write("// tower\nsphere{<%.3f, %.3f, %.3f>, %.3f\n"  % (0, 0, TowerHeight, TowerRadius))
-        #    # fp.write("   texture{pigment{color White} \n   finish{ambient 0.15 diffuse 2.0}}}\n")
-        #    fp.write("//pole\ncylinder{<%.3f, %.3f, %.3f>, <%.3f, %.3f, %.3f>, %.3f\n"  % (mirrorP +  centerP + (0.5,)))
-        #    fp.write("   texture{pigment{color White} \n   finish{ambient 0.15 diffuse 2.0}}}\n")
 
                     
     def povDrawVector(self,dayTime, vector, offset, color = 'red'):
@@ -232,7 +212,9 @@ class CityVisualizer:
         pngFiles = []
         threshhold = 3
         idx = 0
+        #go through all pov files and process them with pov-ray to make png files
         while idx < len(povFiles):
+            #do <threshhold> at a time so that the computer doesnt get overwhelmed
             if idx < len(pngFiles) + threshhold:
                 subprocess.Popen(f"start pvengine {povFiles[idx]} -d Grayscale_Output=true /exit", shell=True)
                 idx += 1
@@ -246,26 +228,23 @@ class CityVisualizer:
                 done = True
         print("done with png processing")
         sunPixels = 0
+        # for all files, count the number of white pixels
         for pngFile in pngFiles:
             image = Image.open(pngFile)
             data = asarray(image)
             for i in range(len(data)):
                 for j in range(len(data[0])):
-                # white = True
+                    #65535 represents white in greyscale
                     if data[i][j] == 65535:
                         sunPixels += 1
-                    # for k in range(3):
-                    #   if data[i][j][k] < 255:
-                    #     white = False 
-                    #     break
-                    # if white:
-                        # sunPixels += 1
 
         print("sunscore is " + str(sunPixels))
+        #reset os path for next process
         os.chdir(os.path.abspath("../.."))
         end = datetime.now()
         duration = end-start 
         print(duration)
+        #return the number of white pixels
         return sunPixels
 
 
