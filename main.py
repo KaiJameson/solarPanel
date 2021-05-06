@@ -5,14 +5,8 @@ import random
 import json
 
 
-#check to see if a current  generation already exists
-#if true: start by loading that generation
-#generations will have 2 parents saved
 
-# visualizer = CityVisualizer.CityVisualizer("Omaha")
-# layout = SolarLayout.SolarLayout()
-# visualizer.oneDaySimulation(layout.getPoints(), sampleTime=5)
-# layout.setScore(visualizer.process())
+
 city = "Omaha"
 
 generationStorage = "currentGeneration.txt"
@@ -43,7 +37,11 @@ def generationNum():
     return len(lines)+1
   else:
     return 0
+
+
 generationSize = 10
+#check to see if a current  generation already exists
+#if true: start by loading that generation
 currentGeneration = loadGeneration()
 generationCt = generationNum()
 
@@ -56,6 +54,7 @@ def load_scores():
   else:
     return {}
 
+#load previously calculated scores to avoid extra work in training
 scores = load_scores()
 
 def save_scores(scores):
@@ -66,7 +65,7 @@ def save_scores(scores):
 
 while True:
   print(f"Starting generation {generationCt}")
-  #create 2 children
+  #create generationSize children
   for i in range(generationSize-1):
     currentGeneration.append(currentGeneration[i]+currentGeneration[i+1])
   currentGeneration.append(currentGeneration[0]+currentGeneration[len(currentGeneration)-1])
@@ -74,24 +73,24 @@ while True:
   for i in range(random.randint(0,len(currentGeneration)//2)):
     toMutate = random.randint(0,len(currentGeneration)-1)
     currentGeneration[toMutate].mutate()
+  #for every layout, calculate their fitness score
   for layout in currentGeneration:
+    #if this layouts score has laready been calculated, avoid calculating it again
     if str(layout) in scores.keys():
       layout.setScore(scores[str(layout)])
     else:
       visualizer = CityVisualizer.CityVisualizer(city)
       visualizer.generalSimulation(layout.getPoints(), 60)
       layout.setScore(visualizer.process())
+      #save the fitness value of this layout for possible future use
       scores[str(layout)] = layout.getScore()
   print("sorting")
+  #sort to find the best of each generation
   currentGeneration.sort()
   nextGeneration = []
+  #the best of each generation will be towards the end
   for i in range(generationSize):
     nextGeneration.append(currentGeneration[len(currentGeneration)-1-i])
-
-# visualizer = CityVisualizer.CityVisualizer("Omaha")
-# layout = SolarLayout.SolarLayout()
-# visualizer.oneDaySimulation(layout.getPoints(), sampleTime=5)
-# layout.setScore(visualizer.process())
 
   print("Saving the current generation")
   f = open(generationStorage, "w")
